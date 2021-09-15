@@ -38,6 +38,7 @@ class CNN(nn.Module):
         self.conv3=nn.Conv2d(in_channels=128, out_channels=32, kernel_size=(3,3), padding=1)
         self.linear=nn.Linear(32*15*20, 2)
         self.maxPool=nn.MaxPool2d(kernel_size=(2,2))
+        self.dropout=nn.Dropout(p=0.2)
         self.tanh=nn.Tanh()
         self.apply(weight_init)
 
@@ -45,9 +46,9 @@ class CNN(nn.Module):
         # Normalize
         x = x / 255.0 - 0.5
         # TODO pass it forward through your network.
-        x=self.relu(self.conv1(x))
+        x=self.dropout(self.relu(self.conv1(x)))
         x=self.maxPool(x)
-        x=self.relu(self.conv2(x))
+        x=self.dropout(self.relu(self.conv2(x)))
         x=self.maxPool(x)
         x=self.relu(self.conv3(x))
         x=self.linear(x.view(x.shape[0], -1))
