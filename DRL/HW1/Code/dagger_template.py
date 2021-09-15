@@ -126,7 +126,7 @@ class Workspace:
             done = False
             while not done:
                 # Need to be moved to numpy from torch
-                if action.device=="cuda":
+                if self.cfg.device=="cuda":
                     action = action.squeeze().detach().cpu().numpy()
                 else:
                     action=action.squeeze().detach().numpy()
@@ -219,7 +219,7 @@ class Workspace:
                 obs = torch.from_numpy(obs).float().to(self.device).unsqueeze(0)
                 t_obs=self.transforms(obs)
                 predicted_action=self.model(t_obs)
-                if predicted_action.device=="cuda":
+                if self.cfg.device=="cuda":
                     predicted_action=predicted_action.squeeze().detach().cpu().numpy()
                 else:
                     predicted_action=predicted_action.squeeze().detach().numpy()
