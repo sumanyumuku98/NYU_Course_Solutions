@@ -11,6 +11,7 @@ file in your submission.
 
 import tqdm
 import hydra
+import matplotlib.pyplot as plt
 import os
 os.environ["HYDRA_FULL_ERROR"] = "1"
 
@@ -175,6 +176,9 @@ class Workspace:
         train_loss, eval_reward, episode_length = 1., 0, 0
         iterable = tqdm.trange(self.cfg.total_training_episodes)
         
+        self.totalrewards=[]
+        self.expertCalls=[]
+        
         global_reward=float('-inf')
         for ep_num in iterable:
             iterable.set_description('Collecting exp')
@@ -242,6 +246,8 @@ class Workspace:
                 # Evaluation loop
                 iterable.set_description('Evaluating model')
                 eval_reward, episode_length = self.eval()
+                self.totalrewards.append(eval_reward)
+                self.expertCalls.append(self.train_env.expert_calls)
                 if eval_reward>global_reward:
                     global_reward=eval_reward
                     torch.save(self.model.state_dict(), os.path.join(self.cfg.save_dir, "policy.pt"))
@@ -251,6 +257,14 @@ class Workspace:
                 'Train reward': train_reward,
                 'Eval reward': eval_reward
             })
+            
+    def plot(self):
+        plt.figure(figsize=(6, 8))
+        plt.plot(self.expertCalls, self.totalrewards)
+        plt.title("Rewards Vs Expert Calls")
+        plt.xlabel("Expert Calls")
+        plt.ylabel("Eval Rewards")
+        plt.savefig(os.path.join(self.cfg.save_dir, "plot.png"), bbox_inches="tight")
 
 
 @hydra.main(config_path='.', config_name='train')
@@ -261,6 +275,7 @@ def main(cfg):
     # be cfg.lr
     workspace = Workspace(cfg)
     workspace.run()
+    workspace.plot()
 
 
 if __name__ == '__main__':
