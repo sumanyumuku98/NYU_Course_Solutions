@@ -67,7 +67,7 @@ def initialize_model_and_optim(cfg):
     model=CNN()
     
     # Initialize Optimizer
-    optimizer=optim.Adam(model.parameters(), lr=cfg.lr, weight_decay=1e-4)
+    optimizer=optim.Adam(model.parameters(), lr=cfg.lr)
     
     return model, optimizer
 
@@ -84,8 +84,8 @@ class Workspace:
             # self.cfg.save_path=os.path.join(save_dir, "policy.pt")
 
         self.device = torch.device(self.cfg.device)
-        self.train_env = ReacherDaggerEnv()
-        self.eval_env = ReacherDaggerEnv()
+        self.train_env = ReacherDaggerEnv(frame_height=120, frame_width=160)
+        self.eval_env = ReacherDaggerEnv(frame_height=120, frame_width=160)
         
         ## edit cfg to set action space dim and obs space dim
         # cfg.input_dim=train_env.observation_space.shape
@@ -104,7 +104,7 @@ class Workspace:
             T.RandomResizedCrop(size=(60, 80), scale=(0.95, 1.0)),
         ])
         self.eval_transforms = T.Compose([
-            T.Resize(size=(60, 80))
+            T.Resize(size=(120, 160))
         ])
 
     def eval(self):
@@ -229,7 +229,8 @@ class Workspace:
                 self.expert_buffer.insert(obs, exp_act)
                 ep_train_reward+=reward
                 ep_length+=1
-                    
+            
+            print("Expert Calls: ", self.train_env.expert_calls)
             train_reward = ep_train_reward
             train_episode_length = ep_length
 
