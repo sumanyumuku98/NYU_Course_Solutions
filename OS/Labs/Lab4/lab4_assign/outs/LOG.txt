@@ -1,0 +1,1 @@
+gradeit.sh . outs outs/LOG.txt
